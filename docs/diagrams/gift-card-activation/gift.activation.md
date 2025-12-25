@@ -26,7 +26,16 @@ Body:
 Errors:
     - code: 500
       Name: Internal Server Error
-      Body: no content
+      Body:
+          {
+            "error" : "internal server error",
+          }
+    - code: 400
+      Name: Bad Request
+      Body:
+          {
+            "error" : "invalid gift code",
+          }
 Response:
     - code: 200
       Name: StatusOK
@@ -54,12 +63,6 @@ Errors:
       Body:
           {
             "error" : "failed to add credit",
-          }
-    - code: 400
-      Name: Bad Request
-      Body:
-          {
-            "error" : "invalid gift code",
           }
 Response:
     - code: 200

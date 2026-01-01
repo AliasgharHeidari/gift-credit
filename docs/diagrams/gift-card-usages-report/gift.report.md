@@ -32,13 +32,16 @@ Errors:
      Name: bad request
      Body: 
          {
-            "error" : "invalid GiftCode",
+            "error" : "invalid request body",
          }
 Responses:
     - code: 200
       Name: ok 
       Body:
           {
-            usage list(string)
+            "ID"       : int,
+            "walletID" : int,
+            "GiftCode" : string
+            "--------------------------------"
           }
 ```

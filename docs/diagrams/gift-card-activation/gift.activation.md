@@ -4,7 +4,7 @@
 
 ## Description
 
-1. user call `giftCardActivation` endpoint from giftCode component
+1. user place phoneNumber & GiftCode in request body and call `giftCardActivation` endpoint from giftCode component
 2. giftCode component call `addCredit` endpoint from wallet component
 3. wallet component return `addCredit` request response
 4. giftCode component return `giftCardActivation` request response
@@ -34,7 +34,7 @@ Errors:
       Name: Bad Request
       Body:
           {
-            "error" : "invalid gift code",
+            "error" : "invalid request body",
           }
 Response:
     - code: 200
@@ -48,7 +48,6 @@ Response:
 ## wallet
 
 ```
-
 Name:   addCredit
 Method: Post
 Url:    http://localhost:9898/wallet/gift
@@ -70,5 +69,6 @@ Response:
       Body:
           {
             "message" : "success",
+            "balance" : (unit64)
           }
 ```

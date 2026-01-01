@@ -1,0 +1,20 @@
+wallet & GiftCode systems are two seperated services that communicate over http request.
+
+
+wallet system: 
+    1. shows user balance by Api call.
+    2. shows transactions by Api call (increasments) including: ID, value, time.
+
+GiftCode system:
+    1. add, remove, check status (for each GiftCode).
+    2. shows user balance after using GiftCode.
+    3. each GiftCode has 1'000 avalible usages and adds only 1'000'000 credit to target wallet.
+    4. store users that successfuly used a GiftCode, including: PhoneNumber, GiftCode, Time. afterwards user can get them as list by Api call.
+    5. no authentication, mobile number will be used as wallet id and everyone will be able to use GiftCodes for every number.
+    6. each number can use every GiftCode once.
+    7. no UI or user/admin panel, All request are through Api.
+
+Warnings:
+    1. no authentication for administrators, everyone will be able to create or remove GiftCodes by Api call.
+    2. no otp or other user verification methods (everyone will be able to use GiftCode for other's wallet).
+    3. create/remove wallet option wasn't mentioned in manifest. some example-wallets will be hardcoded for test.

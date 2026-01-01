@@ -24,5 +24,4 @@ func Start() {
 	port := os.Getenv("SERVER_PORT")
 
 	app.Listen(port)
-
 }

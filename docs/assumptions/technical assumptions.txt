@@ -6,7 +6,7 @@ wallet system:
     2. shows transactions by Api call (increasments) including: ID, value, time.
 
 GiftCode system:
-    1. add, remove, check status (for each GiftCode).
+    1. check status (for each GiftCode).
     2. shows user balance after using GiftCode.
     3. each GiftCode has 1'000 avalible usages and adds only 1'000'000 credit to target wallet.
     4. store users that successfuly used a GiftCode, including: PhoneNumber, GiftCode, Time. afterwards user can get them as list by Api call.
@@ -18,3 +18,4 @@ Warnings:
     1. no authentication for administrators, everyone will be able to create or remove GiftCodes by Api call.
     2. no otp or other user verification methods (everyone will be able to use GiftCode for other's wallet).
     3. create/remove wallet option wasn't mentioned in manifest. some example-wallets will be hardcoded for test.
+    4. discount mentioned in manifest and will be considered as GiftCode due the lack of manifest details.

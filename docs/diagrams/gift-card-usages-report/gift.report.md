@@ -3,21 +3,18 @@
 ![giftCode report](./gift.report.png)
 
 ## description
-1. user place GiftCode in request body and calls `GiftCodeReport` endpoint from the giftCode component.
-2. giftCode component returns request's response.(gift code usage list)
+1. user place GiftCode in request url and calls `GiftCodeReport` endpoint from the giftCode component.
+2. giftCode component checks if GiftCode exist and returns request's response.(gift code usage list including : wallet ID, date)
 
 # Api contract
 
 ## GiftCode report
 ```
 Name:   GiftCodeReport
-Method: POST
-Url:    https://localhost:7878/gift/report
+Method: Get
+Url:    https://localhost:7878/gift/report/:giftCode
 Headers:
 Body:
-    {
-        "giftCode" : (string),
-    }
 Errors:
    - code: 404
      Name: not found
@@ -32,16 +29,15 @@ Errors:
      Name: bad request
      Body: 
          {
-            "error" : "invalid request body",
+            "error" : "invalid request url, please enter GiftCode correctly",
          }
 Responses:
     - code: 200
       Name: ok 
       Body:
           {
-            "ID"       : int,
-            "walletID" : int,
-            "GiftCode" : string
+            "walletID" : string,
+            "date" : (Time.time)
             "--------------------------------"
           }
 ```

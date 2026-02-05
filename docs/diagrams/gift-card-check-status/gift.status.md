@@ -4,8 +4,8 @@
 
 ## descriptions
 
-1. user palce giftCode in request body and calls `giftCodeStatus` endpont from the giftCode component
-2. giftCode component returns request response (active or expired)
+1. user palce giftCode in request url and calls `giftCodeStatus` endpont from the giftCode component
+2. giftCode component returns request response (active or expired and avalible uses)
 
 # api contract
 
@@ -14,12 +14,9 @@
 ```
 Name:    GiftCodeStatus
 Method:  Post
-Url:     http://localhost:7878/gift/status
+Url:     http://localhost:7878/gift/status/:giftCode
 Headers: 
 Body:
-    {
-        "giftCode" : (string)
-    }
 Errors:
    - code: 404
      Name: not found
@@ -34,7 +31,7 @@ Errors:
      Name: bad request
      Body: 
          {
-            "error" : "invalid request body",
+            "error" : "invalid request body, Make sure you've entered GiftCode correctly",
          }
 Responses:
        - code: 200
@@ -42,5 +39,6 @@ Responses:
          Body:
              {
                 "message" : "the giftCode is active/expired"
+                "avalible uses" : (int)
              }
 ```

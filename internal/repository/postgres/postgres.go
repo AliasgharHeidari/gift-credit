@@ -2,25 +2,21 @@ package postgres
 
 import (
 	"log"
-	"os"
 
+	"github.com/AliasgharHeidari/gift-credit/config"
 	"github.com/AliasgharHeidari/gift-credit/internal/model"
-	"github.com/joho/godotenv"
 	"gorm.io/driver/postgres"
+
 	"gorm.io/gorm"
 )
 
 var DB *gorm.DB
 
-func InitDB() {
+func InitDB(cfg config.DatabaseConfig) {
 
-	err := godotenv.Load("./.env")
-	if err != nil {
-		panic(err)
-	}
+	dsn := cfg.DSN.String()
 
-	dsn := os.Getenv("DSN")
-
+	var err error
 	if DB, err = gorm.Open(postgres.Open(dsn), &gorm.Config{}); err != nil {
 		log.Print("failed to connect to database, error:", err)
 	}

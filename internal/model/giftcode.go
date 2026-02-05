@@ -1,8 +1,6 @@
 package model
 
 import (
-	"time"
-
 	"gorm.io/gorm"
 )
 
@@ -15,12 +13,19 @@ type GiftCode struct {
 }
 
 type GiftCodeUsage struct {
-	GiftCodeID  int
-	PhoneNumber int
-	UsedAt      time.Time
+	gorm.Model
+	MobileNumber int
+}
+
+type GiftCodeStatus struct {
+	GiftCode string
 }
 
 type Input struct {
 	Phone int    `json:"phone"`
 	Code  string `json:"code"`
 }
+
+type NewBalance struct {
+	Balance float64 `json:"balance"`
+} 

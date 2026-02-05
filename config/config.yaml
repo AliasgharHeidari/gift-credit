@@ -1,0 +1,14 @@
+server:
+  port: ":7878"
+  host: 0.0.0.0
+
+
+database:
+  dsn:
+    host: localhost
+    user: postgres
+    password: "1234"
+    port: 5432
+    dbname: gift_credit
+    sslmode: disable
+    timezone: Asia/Tehran

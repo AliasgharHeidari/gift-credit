@@ -4,14 +4,13 @@ import (
 	"bytes"
 	"encoding/json"
 	"errors"
+	"github.com/AliasgharHeidari/gift-credit/internal/model"
+	"github.com/AliasgharHeidari/gift-credit/internal/repository/postgres"
+	"gorm.io/gorm"
 	"io"
 	"log"
 	"net/http"
 	"strconv"
-
-	"github.com/AliasgharHeidari/gift-credit/internal/model"
-	"github.com/AliasgharHeidari/gift-credit/internal/repository/postgres"
-	"gorm.io/gorm"
 )
 
 var (
@@ -19,6 +18,7 @@ var (
 	ErrGiftCodeUnavailable = errors.New("GiftCode unavailable")
 	ErrGiftCodeOutOfUse    = errors.New("GiftCode is out of use")
 	ErrGiftCodeAleadyUsed  = errors.New("GiftCode already used")
+	ErrNotFound            = errors.New("GiftCode does not exist")
 )
 
 func UseGiftCode(req model.Input) (float64, error) {
@@ -53,7 +53,7 @@ func UseGiftCode(req model.Input) (float64, error) {
 		return 0, ErrGiftCodeAleadyUsed
 	}
 
-	url := "http://localhost:9898/wallet/gift"
+	url := "http://localhost:9898/wallet/topup"
 
 	body := map[string]interface{}{
 		"mobile_number": req.Phone,
@@ -110,18 +110,18 @@ func UseGiftCode(req model.Input) (float64, error) {
 
 }
 
-/* func GiftCodeStatus(GiftCodeInput model.GiftCodeStatus) (string, error) {
+func GiftCodeStatus(GiftCode string) (model.GiftCode, error) {
 	var GiftCodeStruct model.GiftCode
-	DB := postgres.GetDB()
-	var status = "active"
-	err := DB.Where("Code = ?", GiftCodeInput.GiftCode).First(&GiftCodeStruct).Error
-	err := DB.First(&GiftCodeStruct, GiftCodeInput.GiftCode).Error
-	if err == gorm.ErrRecordNotFound {
-		return status, err
-	}
-	if err != nil {
-		return status, InternalErr
-	}
-	if G
 
-} */
+	DB := postgres.GetDB()
+
+	result := DB.Model(&model.GiftCode{}).Where("Code = ? ", GiftCode).Find(&GiftCodeStruct)
+	if result.Error != nil {
+		return model.GiftCode{}, InternalErr
+	}
+	if result.RowsAffected == 0 {
+		return model.GiftCode{}, ErrNotFound
+	}
+
+	return GiftCodeStruct, nil
+}

@@ -12,7 +12,7 @@ GiftCode system:
     4. store users that successfuly used a GiftCode, including: PhoneNumber, GiftCode, Time. afterwards user can get them as list by Api call.
     5. no authentication, mobile number will be used as wallet id and everyone will be able to use GiftCodes for every number.
     6. each number can use every GiftCode once.
-    7. no UI or user/admin panel, All request are through Api.
+    7. no UI or user/admin panel, All requests are through Api.
 
 Warnings:
     1. no authentication for administrators, everyone will be able to create or remove GiftCodes by Api call.

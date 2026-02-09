@@ -47,16 +47,26 @@ func UseGiftCode(c *fiber.Ctx) error {
 	})
 }
 
-/* func GiftCodeStatus(c *fiber.Ctx) error {
+func GiftCodeStatus(c *fiber.Ctx) error {
+	GiftCode := c.Params("giftcode")
 
-	var GiftCode model.GiftCodeStatus
-	err := c.BodyParser(&GiftCode)
-	if err != nil {
-		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
-			"error": "invalid body request",
+	result, err := service.GiftCodeStatus(GiftCode)
+	if errors.Is(err, service.InternalErr) {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "unexpected error, please try again later",
 		})
 	}
-	status, err := service.GiftCodeStatus(GiftCode)
+	if errors.Is(err, service.ErrNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "GiftCode does not exist, make sure you've entered it correctly",
+		})
+	}
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"Code":        result.Code,
+		"Created-At":  result.UpdatedAt.Format("2006-01-02 15:04:05"),
+		"Used-counts": result.UsedCount,
+		"max-usages":  result.MaxUsage,
+		"IsActive":    result.IsActive,
+	})
 
 }
-*/

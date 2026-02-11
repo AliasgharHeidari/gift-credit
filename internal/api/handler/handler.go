@@ -2,6 +2,8 @@ package handler
 
 import (
 	"errors"
+	"log"
+
 
 	"github.com/AliasgharHeidari/gift-credit/internal/model"
 	"github.com/AliasgharHeidari/gift-credit/internal/service"
@@ -67,6 +69,37 @@ func GiftCodeStatus(c *fiber.Ctx) error {
 		"Used-counts": result.UsedCount,
 		"max-usages":  result.MaxUsage,
 		"IsActive":    result.IsActive,
+	})
+
+}
+
+func CreateGiftCode(c *fiber.Ctx) error {
+	var NewGiftCode model.GiftCode
+	err := c.BodyParser(&NewGiftCode)
+	if err != nil {
+		log.Println(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body",
+		})
+	}
+
+	err = service.CreateGiftCode(NewGiftCode)
+	if errors.Is(err, service.ErrGiftCodeAleadyExist) {
+		return c.Status(fiber.StatusConflict).JSON(fiber.Map{
+			"error": "GiftCode already exist",
+		})
+	}
+
+	if errors.Is(err, service.InternalErr) {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal error, please try again later",
+		})
+	}
+
+	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
+		"GiftCode Created": nil,
+		"Code":             NewGiftCode.Code,
+		"Max-usage":        NewGiftCode.MaxUsage,
 	})
 
 }

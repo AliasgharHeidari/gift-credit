@@ -6,10 +6,10 @@ import (
 
 type GiftCode struct {
 	gorm.Model
-	Code      string
-	UsedCount int
-	MaxUsage  int
-	IsActive  bool
+	Code      string `json:"Code"`
+	UsedCount int    `json:"UseCount"`
+	MaxUsage  int    `json:"MaxUsage"`
+	IsActive  bool   `json:"IsActive"`
 }
 
 type GiftCodeUsage struct {
@@ -28,4 +28,4 @@ type Input struct {
 
 type NewBalance struct {
 	Balance float64 `json:"balance"`
-} 
+}

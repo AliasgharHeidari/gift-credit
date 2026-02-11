@@ -20,6 +20,7 @@ func Start(cfg config.ServerConfig) {
  	app.Get("/gift/status/:giftcode", handler.GiftCodeStatus)
 
 	// Create GiftCode
+	app.Post("/gift/Create", handler.CreateGiftCode)
 
 	
 	app.Listen(cfg.Port)

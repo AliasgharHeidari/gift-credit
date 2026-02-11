@@ -19,6 +19,7 @@ var (
 	ErrGiftCodeOutOfUse    = errors.New("GiftCode is out of use")
 	ErrGiftCodeAleadyUsed  = errors.New("GiftCode already used")
 	ErrNotFound            = errors.New("GiftCode does not exist")
+	ErrGiftCodeAleadyExist = errors.New("GiftCode already exist")
 )
 
 func UseGiftCode(req model.Input) (float64, error) {
@@ -124,4 +125,20 @@ func GiftCodeStatus(GiftCode string) (model.GiftCode, error) {
 	}
 
 	return GiftCodeStruct, nil
+}
+
+func CreateGiftCode(NewGiftCode model.GiftCode) error {
+	DB := postgres.GetDB()
+	var count model.GiftCode
+	result := DB.Model(&model.GiftCode{}).Where("Code = ?", NewGiftCode.Code).Find(&count)
+	if result.RowsAffected != 0 {
+		return ErrGiftCodeAleadyExist
+	}
+	if result.Error != nil {
+		return InternalErr
+	}
+
+	DB.Save(&NewGiftCode)
+	return nil
+
 }

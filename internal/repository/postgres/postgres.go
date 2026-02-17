@@ -23,7 +23,7 @@ func InitDB(cfg config.DatabaseConfig) {
 }
 
 func AutoMigrate() {
-	err := DB.AutoMigrate(&model.GiftCode{}, &model.GiftCodeUsage{})
+	err := DB.AutoMigrate(&model.GiftCode{},)
 	if err != nil {
 		log.Print("failed to automigrate, error:", err)
 	}

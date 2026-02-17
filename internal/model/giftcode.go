@@ -6,16 +6,17 @@ import (
 
 type GiftCode struct {
 	gorm.Model
-	Code      string `json:"Code"`
-	UsedCount int    `json:"UseCount"`
-	MaxUsage  int    `json:"MaxUsage"`
-	IsActive  bool   `json:"IsActive"`
+	Code         string `json:"Code"`
+	UsedCount    int    `json:"UseCount"`
+	MaxUsage     int    `json:"MaxUsage"`
+	IsActive     bool   `json:"IsActive"`
+	MobileNumber int    `json:"MobileNumber"`
 }
 
-type GiftCodeUsage struct {
+/* type GiftCodeUsage struct {
 	gorm.Model
 	MobileNumber int
-}
+} */
 
 type GiftCodeStatus struct {
 	GiftCode string

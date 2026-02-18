@@ -3,7 +3,7 @@ package handler
 import (
 	"errors"
 	"log"
-
+	"time"
 
 	"github.com/AliasgharHeidari/gift-credit/internal/model"
 	"github.com/AliasgharHeidari/gift-credit/internal/service"
@@ -97,9 +97,40 @@ func CreateGiftCode(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusCreated).JSON(fiber.Map{
-		"GiftCode Created": nil,
-		"Code":             NewGiftCode.Code,
-		"Max-usage":        NewGiftCode.MaxUsage,
+		"message":   "GiftCode Created",
+		"Code":      NewGiftCode.Code,
+		"Max-usage": NewGiftCode.MaxUsage,
+	})
+
+}
+
+func DeleteGiftCode(c *fiber.Ctx) error {
+	var input model.GiftCode
+
+	err := c.BodyParser(&input)
+	if err != nil {
+		log.Println(err)
+		return c.Status(fiber.StatusBadRequest).JSON(fiber.Map{
+			"error": "invalid request body, must be : {Code : (string)} all in double quote",
+		})
+	}
+
+	err = service.DeleteGiftCode(input)
+	if errors.Is(err, service.InternalErr) {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "unexpected error, please try again later",
+		})
+	}
+
+	if errors.Is(err, service.ErrNotFound) {
+		return c.Status(fiber.StatusNotFound).JSON(fiber.Map{
+			"error": "couldn't find giftcode",
+		})
+	}
+
+	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
+		"message" : "GiftCode has been deleted successfuly",
+		"deleted at" : time.Now(),
 	})
 
 }

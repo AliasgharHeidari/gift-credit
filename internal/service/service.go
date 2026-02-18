@@ -140,7 +140,7 @@ func UpdateUsages(tx *gorm.DB, req model.Input) {
 	tx.Model(&model.GiftCode{}).Where("code = ?", req.Code).Update("Mobile_Number", req.Phone)
 }
 
-func GetNewBalance(req model.Input)(model.NewBalance) {
+func GetNewBalance(req model.Input) model.NewBalance {
 
 	strPhone := strconv.Itoa(req.Phone)
 
@@ -162,6 +162,9 @@ func GetNewBalance(req model.Input)(model.NewBalance) {
 	log.Println(response.Balance)
 	return response
 }
+
+// end of UsetCGifode related funcs
+// following funcs are for other options
 
 func GiftCodeStatus(GiftCode string) (model.GiftCode, error) {
 	var GiftCodeStruct model.GiftCode
@@ -193,4 +196,31 @@ func CreateGiftCode(NewGiftCode model.GiftCode) error {
 	DB.Save(&NewGiftCode)
 	return nil
 
+}
+
+func DeleteGiftCode(input model.GiftCode) error {
+	DB := postgres.GetDB()
+	tx := DB.Begin()
+
+	var count model.GiftCode
+	result := tx.Model(&model.GiftCode{}).Where("Code = ?", input.Code).Find(&count)
+	if result.Error != nil {
+		tx.Rollback()
+		return InternalErr
+	}
+	if result.RowsAffected == 0 {
+		tx.Rollback()
+		return ErrNotFound
+	}
+	err := tx.Model(&model.GiftCode{}).Where("Code = ?", input.Code).Delete(&model.GiftCode{}).Error
+	if err != nil {
+		tx.Rollback()
+		return InternalErr
+	}
+
+	if err := tx.Commit().Error; err != nil {
+		return err
+	}
+
+	return nil
 }

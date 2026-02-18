@@ -39,30 +39,74 @@ func UseGiftCode(req model.Input) (float64, error) {
 		tx.Rollback()
 		return 0, err
 	}
-
-	if gift.IsActive == false {
-		return 0, ErrGiftCodeUnavailable
-	} else if gift.UsedCount >= 1000 {
-
-		tx.Model(&model.GiftCode{}).Where("Code = ? ", req.Code).Update("is_active", false)
+	// checks if GiftCode is avalible
+	err := CheckIsActive(&gift)
+	if err != nil {
 		tx.Rollback()
 		return 0, ErrGiftCodeOutOfUse
 	}
-	var count int64
-
-	err := tx.Model(&model.GiftCode{}).Where("Mobile_Number = ? AND Code = ?", req.Phone, req.Code).Count(&count).Error
+	// checks if input number already used the giftcode
+	res, err := CheckAlreadyUsed(tx, req)
+	if err != nil {
+		tx.Rollback()
+		return 0, InternalErr
+	}
+	if res == false {
+		tx.Rollback()
+		return 0, ErrGiftCodeAleadyUsed
+	}
+	// requests wallet service to increase balance
+	resp, err := TopUpRequest(req)
 	if err != nil {
 		tx.Rollback()
 		return 0, InternalErr
 	}
 
-	if count > 0 {
+	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
+		log.Print("wallet service returned status:", resp.StatusCode)
 		tx.Rollback()
-		return 0, ErrGiftCodeAleadyUsed
+		return 0, InternalErr
+	}
+	// Updates fields of usages for limits
+	UpdateUsages(tx, req)
+
+	// request wallet service for the new balance (after applying GiftCode)
+
+	response := GetNewBalance(req)
+
+	if err := tx.Commit().Error; err != nil {
+		return 0, err
 	}
 
-	// url topup request
-	TopupReq()
+	return response.Balance, nil
+
+}
+
+// following funcs are related to func UseGiftCode
+
+func CheckIsActive(gift *model.GiftCode) error {
+	var err = errors.New("err")
+	if gift.IsActive == false {
+		return err
+	} else if gift.UsedCount >= 1000 {
+		return err
+	}
+	return nil
+}
+
+func CheckAlreadyUsed(tx *gorm.DB, req model.Input) (bool, error) {
+	var count int64
+	err := tx.Model(&model.GiftCode{}).Where("Code = ? AND Mobile_Number = ?", req.Code, req.Phone).Count(&count).Error
+	if err != nil {
+		return false, err
+	}
+	if count > 0 {
+		return false, nil
+	}
+	return true, nil
+}
+
+func TopUpRequest(req model.Input) (*http.Response, error) {
 
 	url := "http://localhost:9898/wallet/topup"
 
@@ -74,8 +118,7 @@ func UseGiftCode(req model.Input) (float64, error) {
 	request, err := http.NewRequest("POST", url, bytes.NewBuffer(jsonBody))
 	if err != nil {
 		log.Print("failed to create request")
-		tx.Rollback()
-		return 0, InternalErr
+		return nil, err
 	}
 
 	request.Header.Set("Content-Type", "application/json")
@@ -84,26 +127,26 @@ func UseGiftCode(req model.Input) (float64, error) {
 	resp, err := client.Do(request)
 	if err != nil {
 		log.Print("failed to request wallet service, error:", err)
-		tx.Rollback()
-		return 0, InternalErr
+		return nil, err
 	}
 	defer resp.Body.Close()
 
-	if resp.StatusCode != http.StatusOK && resp.StatusCode != http.StatusAccepted {
-		log.Print("wallet service returned status:", resp.StatusCode)
-		tx.Rollback()
-		return 0, InternalErr
-	}
+	return resp, nil
 
+}
+
+func UpdateUsages(tx *gorm.DB, req model.Input) {
 	tx.Model(&model.GiftCode{}).Where("code = ?", req.Code).Update("UsedCount", gorm.Expr("used_count + 1"))
-
 	tx.Model(&model.GiftCode{}).Where("code = ?", req.Code).Update("Mobile_Number", req.Phone)
+}
+
+func GetNewBalance(req model.Input)(model.NewBalance) {
 
 	strPhone := strconv.Itoa(req.Phone)
 
 	Url := "http://localhost:9898/wallet/" + strPhone
 
-	resp, err = http.Get(Url)
+	resp, err := http.Get(Url)
 	if err != nil {
 		log.Println(err)
 	}
@@ -117,21 +160,9 @@ func UseGiftCode(req model.Input) (float64, error) {
 	err = json.Unmarshal(Body, &response)
 
 	log.Println(response.Balance)
-
-	if err := tx.Commit().Error; err != nil {
-		return 0, err
-	}
-
-	return response.Balance, nil
-
+	return response
 }
 
-func TopupReq()(){
-
-
-
-	
-}
 func GiftCodeStatus(GiftCode string) (model.GiftCode, error) {
 	var GiftCodeStruct model.GiftCode
 

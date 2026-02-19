@@ -25,10 +25,6 @@ var (
 )
 
 func UseGiftCode(req model.Input) (float64, error) {
-
-	log.Print(req.Code)
-	log.Print(req.Phone)
-
 	var gift model.GiftCode
 	DB := postgres.GetDB()
 
@@ -171,12 +167,13 @@ func GiftCodeStatus(GiftCode string) (model.GiftCode, error) {
 
 	DB := postgres.GetDB()
 
-	result := DB.Model(&model.GiftCode{}).Where("Code = ? ", GiftCode).Find(&GiftCodeStruct)
+	result := DB.Model(&model.GiftCode{}).Where("Code = ? ", GiftCode).First(&GiftCodeStruct)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		return model.GiftCode{}, ErrNotFound
+	}
+
 	if result.Error != nil {
 		return model.GiftCode{}, InternalErr
-	}
-	if result.RowsAffected == 0 {
-		return model.GiftCode{}, ErrNotFound
 	}
 
 	return GiftCodeStruct, nil
@@ -203,14 +200,14 @@ func DeleteGiftCode(input model.GiftCode) error {
 	tx := DB.Begin()
 
 	var count model.GiftCode
-	result := tx.Model(&model.GiftCode{}).Where("Code = ?", input.Code).Find(&count)
+	result := tx.Clauses(clause.Locking{Strength: "UPDATE"}).Where("Code = ?", input.Code).First(&count)
+	if errors.Is(result.Error, gorm.ErrRecordNotFound) {
+		tx.Rollback()
+		return ErrNotFound
+	}
 	if result.Error != nil {
 		tx.Rollback()
 		return InternalErr
-	}
-	if result.RowsAffected == 0 {
-		tx.Rollback()
-		return ErrNotFound
 	}
 	err := tx.Model(&model.GiftCode{}).Where("Code = ?", input.Code).Delete(&model.GiftCode{}).Error
 	if err != nil {
@@ -223,4 +220,17 @@ func DeleteGiftCode(input model.GiftCode) error {
 	}
 
 	return nil
+}
+
+func GetGiftCodeList() ([]model.GiftCode, error) {
+	DB := postgres.GetDB()
+
+	var gifts []model.GiftCode
+	
+	err := DB.Find(&gifts).Error
+	if err != nil {
+		return []model.GiftCode{}, InternalErr
+	}
+
+	return gifts, nil
 }

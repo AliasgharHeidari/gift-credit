@@ -13,17 +13,22 @@ func Start(cfg config.ServerConfig) {
 
 	app.Use(logger.New())
 	
-	// Use giftcode
+	// Use GiftCode
 	app.Post("/gift", handler.UseGiftCode)
 
-	// Get giftcode status
+	// Get GiftCode status
  	app.Get("/gift/status/:giftcode", handler.GiftCodeStatus)
 
 	// Create GiftCode
 	app.Post("/gift/Create", handler.CreateGiftCode)
 
+	// Get GiftCode list
+	app.Get("/gift/", handler.GetGiftCodeList)
+	
 	// Delete GiftCode
 	app.Delete("/gift/", handler.DeleteGiftCode)
+
+
 	
 	app.Listen(cfg.Port)
 }

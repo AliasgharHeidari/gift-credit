@@ -129,8 +129,20 @@ func DeleteGiftCode(c *fiber.Ctx) error {
 	}
 
 	return c.Status(fiber.StatusAccepted).JSON(fiber.Map{
-		"message" : "GiftCode has been deleted successfuly",
-		"deleted at" : time.Now(),
+		"message":    "GiftCode has been deleted successfuly",
+		"deleted at": time.Now(),
 	})
 
+}
+
+func GetGiftCodeList(c *fiber.Ctx) error {
+
+	gifts, err := service.GetGiftCodeList()
+	if errors.Is(err, service.InternalErr) {
+		return c.Status(fiber.StatusInternalServerError).JSON(fiber.Map{
+			"error": "internal error, please try again later",
+		})
+	}
+
+	return c.Status(fiber.StatusOK).JSON(gifts)
 }
